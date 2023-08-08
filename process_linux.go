@@ -18,6 +18,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type UnixProcess struct {
@@ -73,8 +74,12 @@ func newUnixProcess(pid int) (*UnixProcess, error) {
 }
 
 func (p *UnixProcess) Refresh() error {
-	statPathsss := fmt.Sprintf("/proc/%d/cmdline", p.pid)
-	dataBytesss, err := ioutil.ReadFile(statPathsss)
-	p.binary = string(dataBytesss)
-	return err
+	statPath := fmt.Sprintf("/proc/%d/cmdline", p.pid)
+	dataBytes, err := ioutil.ReadFile(statPath)
+	if err != nil {
+		return err
+	}
+
+	p.binary = strings.Replace(string(dataBytes), "\x00", " ", -1)
+	return nil
 }
